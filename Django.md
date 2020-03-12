@@ -10,7 +10,7 @@
 
 
 # С чего начать
-Попробуем создать блог с помощью django.
+Попробуем создать сайт кинотеатра с помощью django.
 
 Для начала создадим виртуальное окружение, активируем его и установим django 2.x.
 
@@ -22,15 +22,14 @@ source ./django2.2/bin/activate
 
 `django-admin startproject project_name`
 ```bash
-django-admin startproject blog
+django-admin startproject cinema
 .
-└── blog
-    ├── blog
-    │   ├── __init__.py
-    │   ├── settings.py
-    │   ├── urls.py
-    │   └── wsgi.py
-    └── manage.py
+├── cinema
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── manage.py
 ```
 Уже сейчас мы можем запустить наше приложение:
 ```bash
@@ -44,12 +43,12 @@ python manage.py runserver
 
 `python manage.py startapp myapp_name`
 
-В нашем случае, мы хотим создать отдельное приложение для статей:
+В нашем случае, мы хотим создать отдельное приложение для регистрации и аутентификации:
 ```bash
-python manage.py startapp articles
+python manage.py startapp authenticate
 
-./blog
-├── articles
+.
+├── authenticate
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -58,7 +57,7 @@ python manage.py startapp articles
 │   ├── models.py
 │   ├── tests.py
 │   └── views.py
-├── blog
+├── cinema
 │   ├── __init__.py
 │   ├── __pycache__
 │   │   ├── __init__.cpython-37.pyc
@@ -67,9 +66,10 @@ python manage.py startapp articles
 │   ├── urls.py
 │   └── wsgi.py
 └── manage.py
+
 ```
 
-После того, как приложение добавлено, необходимо его зарегистрировать в settyngs.py:
+После того, как приложение добавлено, необходимо его зарегистрировать в settings.py:
 ```python
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'articles',
+    'authenticate',
 ]
 ```
 
@@ -97,21 +97,23 @@ MVC - это шаблон проектирования (он же паттерн
 - templates (каталог для шаблонов)
 
 # Routing (роутинг) - urls
-Routing (маршрутизация) urls - это навигация по сайту. Другими словами, это пути в адресной строке браузера, с помощью которых мы переходим по страницам. Пути могут быть статическими и динамическими. Фактически, через url вида https://blog.com/article/55 мы передаём переменные: article раздел статей, 55 - id статьи (уникальный идентификатор статьи).
+Routing (маршрутизация) urls - это навигация по сайту. Другими словами, это пути в адресной строке браузера, с помощью которых мы переходим по страницам. Пути могут быть статическими и динамическими. Фактически, через url вида https://cinema.com/movie/55 мы передаём переменные: movie раздел фильмов, 55 - id фильма (уникальный идентификатор фильма).
 
 Хорошая практика разделять роутинг между приложениями. Так проще управлять роутингом, находить ошибки, в целом проектировать роутинг.
 
 Для этого необходимо выполнить следующие шаги:
 
-- Создать файл urls.py в корне папки articles
-- Точкой входа роутинга будет одноимённый файл, котороый был создан при генерации проекта и находится в папке blog
-- Импортировать в urls.py из папки blog модуль include
+- Создать файл urls.py в корне папки authenticate
+- Импортировать в cinema/urls.py модуль include
 ```python
 from django.urls import path, include
 ```
-- подключить ("заинклюдить") файл articles/urls.py
-
-
+- подключить ("заинклюдить") файл authenticate/urls.py
+```python
+urlpatterns = [
+  path('authenticate/', include('authenticate/urls.py'))
+]
+```
 # Структура проекта
 
 # Создание проекта и его структура
