@@ -211,9 +211,274 @@ Password (again):
 Superuser created successfully.
 ```
 В адрессной строке пишем http://localhost:8000/admin/ и вводим данные созданого суперпользователя.
-![](~/Desktop/Screen Shot 2020-03-17 at 20.18.44.png)
 
-Теперь разберемся с формой.
+![](images/admin.png)
+
+Чтобы в админ панели отображалась наша кастомная модель юзера, ее нужно зарегестрировать в файле admin.py нашег приложения authenticate.
+
+```
+from django.contrib import admin
+from .models import User
+
+# Register your models here.
+
+admin.site.register(User)
+```
+
+Теперь наша админка имеет такой вид 
+
+![](images/admin_with_Users.png)
+
+
+Сделаем отображение формы регистрации. Как мы знаем Джанго использует паттерн проэктирования MVT.
+Для templates нужно создать папку в корне нашего проекта
+
+```
+.
+├── authenticate
+├── cinema
+├── db.sqlite3
+└── manage.py
+
+mkdir templates
+
+.
+├── authenticate
+├── cinema
+├── db.sqlite3
+├── manage.py
+└── templates
+```
+в файле settings.py в списке TEMPLATES по ключу DIRS необходимо указать название нашей папки 'templates'
+
+```
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['templates', ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+```
+
+это означает, что все шаблоны Джанго будет искать в этой папке.
+Для шаблонов каждого приложения принято создавать одноименные папки.
+
+```
+
+cd templates/
+mkdir authenticate
+tree -L 2
+.
+├── authenticate
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── cinema
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── db.sqlite3
+├── manage.py
+└── templates
+    └── authenticate
+```
+
+так же создадим базовый шаблон от которого будут наследоваться все остальные
+
+находясь в папке templates создадим файл base.html от которого будут наследоваться все остальные шаблоны
+
+```
+
+touch base.html
+
+.
+├── authenticate
+└── base.html
+```
+
+в файле base.html создаем базовую структуру
+
+![](images/html_base.png)
+
+в base.html в html теге body впишем теплейт тег (teplate tag) {% block content %}. Каждый темплейт тег нужно закрывать {% endblock %}
+
+![](images/html_base_block_content.png)
+
+в папке templates/authenticate создадим файл register.html
+
+```
+.
+├── authenticate
+└── base.html
+cd authenticate/
+touch register.html
+tree
+.
+├── authenticate
+│   └── register.html
+└── base.html
+```
+
+в котором при помощи теплейт тегов "пронаследуемся" от base.html
+![](images/register.png)
+
+Нам необходимо отобразить форму для регестрации пользователя. Для этого в Джанго служит файл forms.py который нам нужно создать.
+Переходим в приложение authenticate
+
+```
+
+cd authenticate
+touch forms.py
+.
+├── __init__.py
+├── __pycache__
+├── admin.py
+├── apps.py
+├── forms.py
+├── migrations
+├── models.py
+├── tests.py
+├── urls.py
+└── views.py
+
+```
+
+В файле forms.py выполняем следущие импорты и создаем класс отвечающий за отображение формы
+
+![](images/forms.png)
+
+в файле views.py создаем класс отвечающий за рендеринг нашей формы
+
+![](images/registeruserview.png)
+
+в register.html
+![](images/register+form.png)
+
+запускаем сервер
+
+```
+
+python manage.py runserver
+
+```
+
+в адрессной строке
+
+```
+
+http://loalhost:8000/authenticate/register/
+
+```
+
+![](images/registerpage.png)
+
+Нам пока не нужны все поля для регистрации пользователя, поэтому в forms.py в fields указываем поля которые хотим задействовать (на самом деле достаточно указать только username, password и password confirmation джанго подставит по умолчанию )
+
+![](images/formschange.png)
+
+Чтобы зарегестрировать пользователя необходимо данные введенные в браузере отправить нашей RegisterUserView методом POST. Для этого в файле register.html темплейт тег {{ form }} нужно поместить в html тег form и добавить  тег input submit
+
+![](images/form_html.png)
+
+где action - это url на который методом POST будут отправлены данные пользователя, а {% csrf_token %} - защита от межсайтовой подделк запроса (обязательный тег для отправки формы методом POST)
+
+
+Проверим через админ панель, создаются ли учетные записи пользователей. Заполняем поле регистрации в браузере
+
+![](images/registeruser.png)
+
+и переходим в админ панель
+```
+http://127.0.0.1:8000/admin/
+```
+
+заходим под суперпользователем, кликаем на поле Users
+
+![](images/createuser_from_browser.png)
+
+как видим, запись пользователя создалась успешно.
+
+Следущий шаг - аутентификация пользователя.
+Аутентификация - это предоставление данных о пользователе для дальнейшей проверки на соответствие с данными внесенными в базу данных.
+
+Создадим обработчик:
+```
+
+authenticate/views.py
+
+from django.contrib.auth.views import LoginView
+
+class LoginUserView(LoginView):
+    template_name = ('authenticate/login.html')
+```
+
+Роутинг:
+```
+authenticate/urls.py
+
+from django.urls import path
+from .views import RegisterUserView, LoginUserView
+
+urlpatterns = [
+    path('register/', RegisterUserView.as_view(), name='register_user'),
+    path('login/', LoginUserView.as_view(), name='login_user'),
+]
+```
+
+Шаблон:
+```
+cd templates/authenticate/
+touch login.html
+```
+
+login.html:
+![](images/login_html.png)
+
+Осталось рассмотреть разлогинивание(я не знаю как сказать иначе. уже поздно и я под устал. ))))
+
+Обработчик:
+```
+authenticate/views.py
+
+from django.contrib.auth.views import LoginView,LogoutView
+
+class LogoutUserView(LogoutView):
+    pass
+```
+
+Роутинг:
+```
+from django.urls import path
+from .views import RegisterUserView, LoginUserView, LogoutUserView
+
+urlpatterns = [
+    path('register/', RegisterUserView.as_view(), name='register_user'),
+    path('login/', LoginUserView.as_view(), name='login_user'),
+    path('logout/', LogoutUserView.as_view(), name='logout_user'),
+]
+```
+Итог
+
+У нас готова простейшая система регистрации и аутентификации которую можно расширять. Дальше будем создавать приложение самого кинотеатра и попутно разбираться с html версткой
+
 
 
 
@@ -229,5 +494,3 @@ Superuser created successfully.
 # Работа с моделью (с базой данных Postgres)
 ## Подключение Postgres
 ## Миграции
-Для проверки созданой модели User, воспользуемся джанговской страницей администратора. Для этого создамим суперюзера через консоль
-```
