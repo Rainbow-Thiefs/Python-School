@@ -197,7 +197,7 @@ Running migrations:
 ```
 
 Посмотреть созданную модель мы можем в админ-панели джанго.
-Но попасть в нее можно только под учетной записью суперпользователя, которую мы сейчас создадим.
+Но попасть на страницу админ - панели можно только под учетной записью суперпользователя, которую мы сейчас создадим.
 В консоли выполняем:
 ```
 python manage.py createsuperuser
@@ -214,7 +214,7 @@ Superuser created successfully.
 
 ![](images/admin.png)
 
-Чтобы в админ панели отображалась наша кастомная модель юзера, ее нужно зарегестрировать в файле admin.py нашег приложения authenticate.
+Чтобы в админ панели отображалась наша кастомная модель юзера, ее нужно зарегестрировать в файле admin.py нашего приложения authenticate.
 
 ```
 from django.contrib import admin
@@ -227,7 +227,7 @@ admin.site.register(User)
 
 Теперь наша админка имеет такой вид 
 
-![](images/admin_with_Users.png)
+![admin_with_user](images/admin_with_Users.png)
 
 
 Сделаем отображение формы регистрации. Как мы знаем Джанго использует паттерн проэктирования MVT.
@@ -249,6 +249,7 @@ mkdir templates
 ├── manage.py
 └── templates
 ```
+
 в файле settings.py в списке TEMPLATES по ключу DIRS необходимо указать название нашей папки 'templates'
 
 ```
@@ -316,11 +317,11 @@ touch base.html
 
 в файле base.html создаем базовую структуру
 
-![](images/html_base.png)
+![html_base](images/html_base.png)
 
 в base.html в html теге body впишем теплейт тег (teplate tag) {% block content %}. Каждый темплейт тег нужно закрывать {% endblock %}
 
-![](images/html_base_block_content.png)
+![html_base_block_content](images/html_base_block_content.png)
 
 в папке templates/authenticate создадим файл register.html
 
@@ -338,7 +339,7 @@ tree
 ```
 
 в котором при помощи теплейт тегов "пронаследуемся" от base.html
-![](images/register.png)
+![register](images/register.png)
 
 Нам необходимо отобразить форму для регестрации пользователя. Для этого в Джанго служит файл forms.py который нам нужно создать.
 Переходим в приложение authenticate
@@ -363,14 +364,14 @@ touch forms.py
 
 В файле forms.py выполняем следущие импорты и создаем класс отвечающий за отображение формы
 
-![](images/forms.png)
+![forms](images/forms.png)
 
 в файле views.py создаем класс отвечающий за рендеринг нашей формы
 
-![](images/registeruserview.png)
+![registeruserview](images/registeruserview.png)
 
 в register.html
-![](images/register+form.png)
+![register+form](images/register+form.png)
 
 запускаем сервер
 
@@ -388,22 +389,22 @@ http://loalhost:8000/authenticate/register/
 
 ```
 
-![](images/registerpage.png)
+![registerpage](images/registerpage.png)
 
 Нам пока не нужны все поля для регистрации пользователя, поэтому в forms.py в fields указываем поля которые хотим задействовать (на самом деле достаточно указать только username, password и password confirmation джанго подставит по умолчанию )
 
-![](images/formschange.png)
+![formchange](images/formschange.png)
 
 Чтобы зарегестрировать пользователя необходимо данные введенные в браузере отправить нашей RegisterUserView методом POST. Для этого в файле register.html темплейт тег {{ form }} нужно поместить в html тег form и добавить  тег input submit
 
-![](images/form_html.png)
+![form_html](images/form_html.png)
 
 где action - это url на который методом POST будут отправлены данные пользователя, а {% csrf_token %} - защита от межсайтовой подделк запроса (обязательный тег для отправки формы методом POST)
 
 
 Проверим через админ панель, создаются ли учетные записи пользователей. Заполняем поле регистрации в браузере
 
-![](images/registeruser.png)
+![registeruser](images/registeruser.png)
 
 и переходим в админ панель
 ```
@@ -412,7 +413,7 @@ http://127.0.0.1:8000/admin/
 
 заходим под суперпользователем, кликаем на поле Users
 
-![](images/createuser_from_browser.png)
+![create_form_browser](images/createuser_from_browser.png)
 
 как видим, запись пользователя создалась успешно.
 
